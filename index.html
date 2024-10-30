@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pilot Training Tools - Runway Selection & Descent Calculator</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Runway Selection Tile -->
+    <div class="tile" id="tile-runway">
+        <h2>Runway Selection</h2>
+        <div class="streak" id="streak-runway">Streak: 0</div>
+        <div class="runway-container">
+            <div class="runway"></div>
+            <div class="runway-label left" id="runway-left">22</div>
+            <div class="runway-label right" id="runway-right">04</div>
+        </div>
+        <div class="wind-direction" id="wind-direction">Wind Direction: 120°</div>
+        <div class="options">
+            <button class="runway-option" onclick="selectRunway('left')">Land on Runway <span id="option-left">22</span></button>
+            <button class="runway-option" onclick="selectRunway('right')">Land on Runway <span id="option-right">04</span></button>
+        </div>
+        <div class="result" id="result-runway"></div>
+    </div>
+
+    <!-- Descent Calculator Tile -->
+    <div class="tile" id="tile-descent">
+        <h2>Descent Calculator</h2>
+        <div class="streak" id="streak-descent">Streak: 0</div>
+        <div class="descent-info">
+            <p>Current Altitude: <span id="current-altitude">5500 ft MSL</span></p>
+            <p>Target Altitude: <span id="target-altitude">1500 ft MSL</span></p>
+            <p>Speed: <span id="speed">90 knots</span></p>
+            <p>Descent Rate: <span id="descent-rate">500 fpm</span></p>
+        </div>
+        <div class="options">
+            <button class="descent-option" onclick="selectDescentDistance(this)">12 miles</button>
+            <button class="descent-option" onclick="selectDescentDistance(this)">14 miles</button>
+            <button class="descent-option" onclick="selectDescentDistance(this)">18 miles</button>
+            <button class="descent-option" onclick="selectDescentDistance(this)">6 miles</button>
+        </div>
+        <div class="result" id="result-descent"></div>
+    </div>
+
+    <!-- Density Altitude Tile -->
+    <div class="tile" id="tile-density-altitude">
+        <h2>Density Altitude Calculator</h2>
+        <div class="streak" id="streak-density-altitude">Streak: 0</div>
+        <div class="density-info">
+            <p>Field Elevation: <span id="field-elevation">2500 ft MSL</span></p>
+            <p>Altimeter Setting: <span id="altimeter-setting">29.92 inHg</span></p>
+            <p>Temperature: <span id="temperature">30°C</span></p>
+        </div>
+        <div class="options">
+            <button class="density-option" onclick="selectDensityAltitude(this)">5,500 ft</button>
+            <button class="density-option" onclick="selectDensityAltitude(this)">6,800 ft</button>
+            <button class="density-option" onclick="selectDensityAltitude(this)">7,200 ft</button>
+            <button class="density-option" onclick="selectDensityAltitude(this)">4,500 ft</button>
+        </div>
+        <div class="result" id="result-density-altitude"></div>
+    </div>
+
+    <!-- Explanation Tiles -->
+    <!-- Runway Selection Explanation -->
+    <div class="tile explanation-tile">
+        <h2>Runway Selection Explained</h2>
+        <p class="explanation-text">
+            Selecting the correct runway is crucial for safe takeoffs and landings. Pilots prefer to land and take off into the wind to reduce ground speed and increase control. The runway numbers correspond to their magnetic heading rounded to the nearest 10 degrees (e.g., Runway 22 is approximately 220°). To determine the best runway, calculate the difference between the wind direction and each runway's heading. The runway with the smallest angle difference (up to 180°) is the optimal choice.
+        </p>
+    </div>
+
+    <!-- Descent Calculator Explanation -->
+    <div class="tile explanation-tile">
+        <h2>Descent Calculation Explained</h2>
+        <p class="explanation-text">
+            Knowing when to start your descent ensures a smooth approach and reduces the need for abrupt altitude changes. The basic formula to calculate the distance to start descent is:
+        </p>
+        <p class="explanation-text formula">
+            <strong>Distance = (Current Altitude - Target Altitude) / (Descent Rate / Ground Speed)</strong>
+        </p>
+        <p class="explanation-text">
+            Since speed is in knots (nautical miles per hour) and descent rate is in feet per minute, we adjust units accordingly:
+        </p>
+        <ol class="explanation-list">
+            <li>Calculate the altitude difference (in feet).</li>
+            <li>Determine the time to descend using the descent rate (Time = Altitude Difference / Descent Rate).</li>
+            <li>Convert speed to nautical miles per minute (Speed / 60).</li>
+            <li>Calculate distance using Distance = Speed per Minute × Time.</li>
+        </ol>
+        <p class="explanation-text">
+            By applying this calculation, you can determine the optimal distance to begin your descent for a smooth and safe approach.
+        </p>
+    </div>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
