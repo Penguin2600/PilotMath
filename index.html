@@ -44,13 +44,29 @@
         <div class="result" id="result-descent"></div>
     </div>
 
+    <!-- Pressure Altitude Tile -->
+    <div class="tile" id="tile-pressure-altitude">
+        <h2>Pressure Altitude Calculator</h2>
+        <div class="streak" id="streak-pressure-altitude">Streak: 0</div>
+        <div class="pressure-info">
+            <p>Field Elevation: <span id="field-elevation-pressure">2500 ft MSL</span></p>
+            <p>Altimeter Setting: <span id="altimeter-setting-pressure">29.92 inHg</span></p>
+        </div>
+        <div class="options">
+            <button class="pressure-option" onclick="selectPressureAltitude(this)">2,500 ft</button>
+            <button class="pressure-option" onclick="selectPressureAltitude(this)">3,200 ft</button>
+            <button class="pressure-option" onclick="selectPressureAltitude(this)">4,100 ft</button>
+            <button class="pressure-option" onclick="selectPressureAltitude(this)">1,800 ft</button>
+        </div>
+        <div class="result" id="result-pressure-altitude"></div>
+    </div>
+
     <!-- Density Altitude Tile -->
     <div class="tile" id="tile-density-altitude">
         <h2>Density Altitude Calculator</h2>
         <div class="streak" id="streak-density-altitude">Streak: 0</div>
         <div class="density-info">
-            <p>Field Elevation: <span id="field-elevation">2500 ft MSL</span></p>
-            <p>Altimeter Setting: <span id="altimeter-setting">29.92 inHg</span></p>
+            <p>Pressure Altitude: <span id="pressure-altitude">3000 ft</span></p>
             <p>Temperature: <span id="temperature">30°C</span></p>
         </div>
         <div class="options">

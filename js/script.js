@@ -169,16 +169,84 @@ function selectDescentDistance(button) {
     setTimeout(generateScenarioDescent, 2000);
 }
 
+/* Pressure Altitude Calculator App */
+let correctStreakPressure = 0;
+
+function generateScenarioPressure() {
+    const fieldElevation = Math.floor(Math.random() * 6501); // 0 to 6500 ft
+    const altimeterSetting = (Math.random() * (32.00 - 28.00) + 28.00).toFixed(2); // 28.00 to 32.00 inHg
+
+    // Calculate pressure altitude
+    const correctPressureAltitude = calculatePressureAltitude(fieldElevation, altimeterSetting);
+
+    // Generate choices
+    const choices = generatePressureChoices(correctPressureAltitude);
+
+    // Update the display
+    document.getElementById('field-elevation-pressure').innerText = fieldElevation + ' ft MSL';
+    document.getElementById('altimeter-setting-pressure').innerText = altimeterSetting + ' inHg';
+
+    const buttons = document.querySelectorAll('.pressure-option');
+    buttons.forEach((button, index) => {
+        button.innerText = choices[index] + ' ft';
+        button.dataset.value = choices[index];
+        button.disabled = false;
+    });
+
+    document.getElementById('result-pressure-altitude').innerText = '';
+
+    // Store correct pressure altitude
+    document.getElementById('tile-pressure-altitude').dataset.correctPressureAltitude = correctPressureAltitude;
+}
+
+function calculatePressureAltitude(fieldElevation, altimeterSetting) {
+    // Pressure altitude calculation
+    const pressureAltitude = fieldElevation + (29.92 - altimeterSetting) * 1000;
+    return Math.round(pressureAltitude);
+}
+
+function generatePressureChoices(correctPressureAltitude) {
+    const choicesSet = new Set([correctPressureAltitude]);
+
+    // Generate incorrect choices
+    while (choicesSet.size < 4) {
+        const variation = Math.floor(Math.random() * 1000) - 500;
+        const altPressureAltitude = correctPressureAltitude + variation;
+        choicesSet.add(altPressureAltitude);
+    }
+
+    const choices = shuffleArray(Array.from(choicesSet));
+    return choices;
+}
+
+function selectPressureAltitude(button) {
+    const selectedAltitude = parseInt(button.dataset.value);
+    const correctAltitude = parseInt(document.getElementById('tile-pressure-altitude').dataset.correctPressureAltitude);
+    const resultElement = document.getElementById('result-pressure-altitude');
+
+    if (selectedAltitude === correctAltitude) {
+        correctStreakPressure++;
+        resultElement.innerText = 'Correct!';
+        resultElement.style.color = 'green';
+    } else {
+        correctStreakPressure = 0;
+        resultElement.innerText = 'Incorrect!';
+        resultElement.style.color = 'red';
+    }
+
+    document.getElementById('streak-pressure-altitude').innerText = 'Streak: ' + correctStreakPressure;
+
+    // Disable buttons
+    document.querySelectorAll('.pressure-option').forEach(btn => btn.disabled = true);
+    setTimeout(generateScenarioPressure, 2000);
+}
+
 /* Density Altitude Calculator App */
 let correctStreakDensity = 0;
 
 function generateScenarioDensity() {
-    const fieldElevation = Math.floor(Math.random() * 6501); // 0 to 6500 ft
+    const pressureAltitude = Math.floor(Math.random() * 8001); // 0 to 8000 ft
     const temperature = Math.floor(Math.random() * 101); // 0 to 100°C
-    const altimeterSetting = (Math.random() * (32.00 - 28.00) + 28.00).toFixed(2); // 28.00 to 32.00 inHg
-
-    // Calculate pressure altitude
-    const pressureAltitude = calculatePressureAltitude(fieldElevation, altimeterSetting);
 
     // Calculate the correct density altitude
     const correctDensityAltitude = calculateDensityAltitude(pressureAltitude, temperature);
@@ -187,8 +255,7 @@ function generateScenarioDensity() {
     const choices = generateDensityChoices(correctDensityAltitude);
 
     // Update the display
-    document.getElementById('field-elevation').innerText = fieldElevation + ' ft MSL';
-    document.getElementById('altimeter-setting').innerText = altimeterSetting + ' inHg';
+    document.getElementById('pressure-altitude').innerText = pressureAltitude + ' ft';
     document.getElementById('temperature').innerText = temperature + '°C';
 
     const buttons = document.querySelectorAll('.density-option');
@@ -202,12 +269,6 @@ function generateScenarioDensity() {
 
     // Store correct density altitude
     document.getElementById('tile-density-altitude').dataset.correctDensityAltitude = correctDensityAltitude;
-}
-
-function calculatePressureAltitude(fieldElevation, altimeterSetting) {
-    // Pressure altitude calculation
-    const pressureAltitude = fieldElevation + (29.92 - altimeterSetting) * 1000;
-    return Math.round(pressureAltitude);
 }
 
 function calculateDensityAltitude(pressureAltitude, temperature) {
@@ -255,6 +316,7 @@ function selectDensityAltitude(button) {
 }
 
 // Initialize apps
+generateScenarioPressure();
 generateScenarioDensity();
 generateScenarioRunway();
 generateScenarioDescent();
