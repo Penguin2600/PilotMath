@@ -2,115 +2,239 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pilot Training Tools - Runway Selection & Descent Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilot Training Tools - Tabbed</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+              },
+              colors: {
+                'correct': '#27ae60', // Green
+                'incorrect': '#c0392b', // Red
+                'primary': '#2c3e50', // Dark Blue
+                'secondary': '#2980b9', // Standard Blue
+                'accent': '#3498db', // Light Blue
+                'background': '#ecf0f1', // Light Gray
+                'tile': '#ffffff', // White
+              }
+            }
+          }
+        }
+      </script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        @font-face {
+          font-family: 'LucideIcons';
+          src: url('https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+        .lucide {
+          font-family: 'LucideIcons';
+          font-size: 1.25rem;
+          line-height: 1;
+          speak: none; font-style: normal; font-weight: normal; font-variant: normal;
+          text-transform: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+        /* Smooth transitions for rotations */
+        .wind-arrow-indicator, .runway-graphic-rotated, .runway-number {
+            transition: transform 0.5s ease-in-out;
+        }
+        /* Style details/summary */
+        details > summary { list-style: none; cursor: pointer; font-weight: 500; color: #6b7280; display: inline-block; }
+        details > summary::-webkit-details-marker { display: none; }
+        details > summary::before { content: '►'; margin-right: 0.3em; font-size: 0.8em; display: inline-block; transition: transform 0.2s; }
+        details[open] > summary::before { transform: rotate(90deg); }
+        /* Runway Edge Lines */
+        #runway-graphic::before, #runway-graphic::after {
+            content: ''; position: absolute; left: 0; width: 100%; height: 2px;
+            background-color: white; opacity: 0.8; z-index: 1;
+        }
+        #runway-graphic::before { top: 4px; }
+        #runway-graphic::after { bottom: 4px; }
+
+        /* Basic Tab Styling */
+        .tab-button[aria-selected="true"] {
+            border-color: #2980b9; /* secondary color */
+            color: #2980b9;
+            font-weight: 600;
+        }
+        .tab-button[aria-selected="false"] {
+            border-color: transparent;
+            color: #6b7280; /* gray-500 */
+        }
+    </style>
 </head>
-<body>
+<body class="bg-background font-sans text-primary p-4 md:p-8">
 
-<div class="container">
-    <!-- Runway Selection Tile -->
-    <div class="tile" id="tile-runway">
-        <h2>Runway Selection</h2>
-        <div class="streak" id="streak-runway">Streak: 0</div>
-        <div class="runway-container">
-            <div class="runway"></div>
-            <div class="runway-label left" id="runway-left">22</div>
-            <div class="runway-label right" id="runway-right">04</div>
+<div class="max-w-4xl mx-auto px-2 sm:px-4 lg:px-6">
+    <h1 class="text-3xl font-bold text-center mb-4 text-primary">Pilot Training Tools</h1>
+    <p class="text-center text-gray-600 mb-8">Practice essential flight calculations. Select a tool below.</p>
+
+    <div class="mb-6 border-b border-gray-300">
+        <div role="tablist" aria-label="Pilot Tools Tabs" class="flex space-x-1 -mb-px">
+            <button id="tab-btn-runway" role="tab" aria-selected="true" aria-controls="tab-panel-runway"
+                    class="tab-button inline-block py-3 px-4 border-b-2 text-sm font-medium text-center focus:outline-none transition duration-150 ease-in-out">
+                Runway Selection
+            </button>
+            <button id="tab-btn-descent" role="tab" aria-selected="false" aria-controls="tab-panel-descent"
+                    class="tab-button inline-block py-3 px-4 border-b-2 text-sm font-medium text-center focus:outline-none transition duration-150 ease-in-out">
+                Descent Calc
+            </button>
+            <button id="tab-btn-pressure" role="tab" aria-selected="false" aria-controls="tab-panel-pressure"
+                    class="tab-button inline-block py-3 px-4 border-b-2 text-sm font-medium text-center focus:outline-none transition duration-150 ease-in-out">
+                Pressure Alt
+            </button>
+            <button id="tab-btn-density" role="tab" aria-selected="false" aria-controls="tab-panel-density"
+                    class="tab-button inline-block py-3 px-4 border-b-2 text-sm font-medium text-center focus:outline-none transition duration-150 ease-in-out">
+                Density Alt
+            </button>
         </div>
-        <div class="wind-direction" id="wind-direction">Wind Direction: 120°</div>
-        <div class="options">
-            <button class="runway-option" onclick="selectRunway('left')">Land on Runway <span id="option-left">22</span></button>
-            <button class="runway-option" onclick="selectRunway('right')">Land on Runway <span id="option-right">04</span></button>
-        </div>
-        <div class="result" id="result-runway"></div>
     </div>
 
-    <!-- Descent Calculator Tile -->
-    <div class="tile" id="tile-descent">
-        <h2>Descent Calculator</h2>
-        <div class="streak" id="streak-descent">Streak: 0</div>
-        <div class="descent-info">
-            <p>Current Altitude: <span id="current-altitude">5500 ft MSL</span></p>
-            <p>Target Altitude: <span id="target-altitude">1500 ft MSL</span></p>
-            <p>Speed: <span id="speed">90 knots</span></p>
-            <p>Descent Rate: <span id="descent-rate">500 fpm</span></p>
-        </div>
-        <div class="options">
-            <button class="descent-option" onclick="selectDescentDistance(this)">12 miles</button>
-            <button class="descent-option" onclick="selectDescentDistance(this)">14 miles</button>
-            <button class="descent-option" onclick="selectDescentDistance(this)">18 miles</button>
-            <button class="descent-option" onclick="selectDescentDistance(this)">6 miles</button>
-        </div>
-        <div class="result" id="result-descent"></div>
-    </div>
+    <div>
+        <div id="tab-panel-runway" role="tabpanel" aria-labelledby="tab-btn-runway">
+            <div id="tile-runway" class="bg-tile p-5 rounded-lg shadow-md flex flex-col relative">
+                <div id="streak-runway" class="absolute top-3 right-4 text-sm font-semibold text-gray-500">Streak: 0</div>
+                <h2 class="text-xl font-bold mb-4 text-center text-primary">Runway Selection</h2>
 
-    <!-- Pressure Altitude Tile -->
-    <div class="tile" id="tile-pressure-altitude">
-        <h2>Pressure Altitude Calculator</h2>
-        <div class="streak" id="streak-pressure-altitude">Streak: 0</div>
-        <div class="pressure-info">
-            <p>Field Elevation: <span id="field-elevation-pressure">2500 ft MSL</span></p>
-            <p>Altimeter Setting: <span id="altimeter-setting-pressure">29.92 inHg</span></p>
-        </div>
-        <div class="options">
-            <button class="pressure-option" onclick="selectPressureAltitude(this)">2,500 ft</button>
-            <button class="pressure-option" onclick="selectPressureAltitude(this)">3,200 ft</button>
-            <button class="pressure-option" onclick="selectPressureAltitude(this)">4,100 ft</button>
-            <button class="pressure-option" onclick="selectPressureAltitude(this)">1,800 ft</button>
-        </div>
-        <div class="result" id="result-pressure-altitude"></div>
-    </div>
+                <div class="relative w-full h-48 mb-4 flex items-center justify-center">
+                    <div id="runway-graphic" class="runway-graphic-rotated relative w-52 h-12 bg-gray-700 rounded flex items-center justify-center shadow-inner transform rotate-0">
+                         <div class="absolute w-[90%] h-0.5 bg-white opacity-70 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10" style="background-image: repeating-linear-gradient(to right, white, white 8px, transparent 8px, transparent 20px);"></div>
+                        <div id="runway-left" class="runway-number absolute left-2 text-white font-bold text-sm transform rotate-0 z-20">--</div>
+                        <div id="runway-right" class="runway-number absolute right-2 text-white font-bold text-sm transform rotate-0 z-20">--</div>
+                    </div>
+                    <div id="wind-arrow-container" class="absolute w-full h-full top-0 left-0 flex items-center justify-center pointer-events-none hidden">
+                        <div class="wind-arrow-indicator w-16 h-16 transform rotate-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full text-red-600 opacity-80">
+                                <path d="M12 19V5M5 12l7-7 7 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Density Altitude Tile -->
-    <div class="tile" id="tile-density-altitude">
-        <h2>Density Altitude Calculator</h2>
-        <div class="streak" id="streak-density-altitude">Streak: 0</div>
-        <div class="density-info">
-            <p>Pressure Altitude: <span id="pressure-altitude">3000 ft</span></p>
-            <p>Temperature: <span id="temperature">30°C</span></p>
+                <div id="wind-direction" class="text-center font-medium mb-2 text-secondary">Wind: ---°</div>
+                <div class="text-center mb-4">
+                    <button id="show-wind-hint-btn" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-3 rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-gray-400 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+                        Show Wind Hint
+                    </button>
+                </div>
+                <div class="explanation-section mt-4 pt-3 border-t border-gray-200 text-center">
+                     <details>
+                        <summary class="text-sm">How to Choose</summary>
+                        <p class="text-xs text-gray-600 leading-relaxed mt-2 text-left px-2">
+                            Land/take off into the wind. Runway numbers show magnetic heading (e.g., Rwy 22 ≈ 220°). Pick the runway with the smallest angle difference to the wind (less than 90° is ideal, compare the angles up to 180°).
+                        </p>
+                     </details>
+                </div>
+                <div class="options mt-4 space-y-2">
+                    <button id="runway-option-left" class="w-full bg-secondary hover:bg-accent text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+                        Land Runway <span id="option-left">--</span>
+                    </button>
+                    <button id="runway-option-right" class="w-full bg-secondary hover:bg-accent text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+                        Land Runway <span id="option-right">--</span>
+                    </button>
+                </div>
+                <div id="result-runway" class="result-feedback mt-4 text-center font-bold text-lg h-6"></div>
+            </div>
         </div>
-        <div class="options">
-            <button class="density-option" onclick="selectDensityAltitude(this)">5,500 ft</button>
-            <button class="density-option" onclick="selectDensityAltitude(this)">6,800 ft</button>
-            <button class="density-option" onclick="selectDensityAltitude(this)">7,200 ft</button>
-            <button class="density-option" onclick="selectDensityAltitude(this)">4,500 ft</button>
+
+        <div id="tab-panel-descent" role="tabpanel" aria-labelledby="tab-btn-descent" class="hidden">
+             <div id="tile-descent" class="bg-tile p-5 rounded-lg shadow-md flex flex-col relative">
+                <div id="streak-descent" class="absolute top-3 right-4 text-sm font-semibold text-gray-500">Streak: 0</div>
+                <h2 class="text-xl font-bold mb-4 text-center text-primary">Descent Calculator</h2>
+                <div class="descent-info mb-4 text-center space-y-1 text-gray-700">
+                    <p>Current Alt: <span id="current-altitude" class="font-semibold">---- ft</span></p>
+                    <p>Target Alt: <span id="target-altitude" class="font-semibold">---- ft</span></p>
+                    <p>Speed: <span id="speed" class="font-semibold">-- kts</span></p>
+                    <p>Rate: <span id="descent-rate" class="font-semibold">--- fpm</span></p>
+                </div>
+                 <div class="explanation-section mt-4 pt-3 border-t border-gray-200 text-center">
+                     <details>
+                        <summary class="text-sm">How to Calculate</summary>
+                        <div class="text-xs text-gray-600 leading-relaxed mt-2 text-left px-2 space-y-1">
+                            <p>Find the distance needed to descend smoothly.</p>
+                            <ol class="list-decimal list-inside text-xs">
+                                <li>Altitude to lose (ft) = Current Alt - Target Alt.</li>
+                                <li>Time (min) = Altitude to Lose / Rate (fpm).</li>
+                                <li>Speed (NM/min) = Speed (kts) / 60.</li>
+                                <li>Distance (NM) = Speed (NM/min) × Time (min).</li>
+                            </ol>
+                        </div>
+                     </details>
+                </div>
+                <div class="options mt-4 grid grid-cols-2 gap-2">
+                    <button class="descent-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">-- miles</button>
+                    <button class="descent-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">-- miles</button>
+                    <button class="descent-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">-- miles</button>
+                    <button class="descent-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">-- miles</button>
+                </div>
+                <div id="result-descent" class="result-feedback mt-4 text-center font-bold text-lg h-6"></div>
+            </div>
         </div>
-        <div class="result" id="result-density-altitude"></div>
-    </div>
 
-    <!-- Explanation Tiles -->
-    <!-- Runway Selection Explanation -->
-    <div class="tile explanation-tile">
-        <h2>Runway Selection Explained</h2>
-        <p class="explanation-text">
-            Selecting the correct runway is crucial for safe takeoffs and landings. Pilots prefer to land and take off into the wind to reduce ground speed and increase control. The runway numbers correspond to their magnetic heading rounded to the nearest 10 degrees (e.g., Runway 22 is approximately 220°). To determine the best runway, calculate the difference between the wind direction and each runway's heading. The runway with the smallest angle difference (up to 180°) is the optimal choice.
-        </p>
-    </div>
+        <div id="tab-panel-pressure" role="tabpanel" aria-labelledby="tab-btn-pressure" class="hidden">
+            <div id="tile-pressure-altitude" class="bg-tile p-5 rounded-lg shadow-md flex flex-col relative">
+                <div id="streak-pressure-altitude" class="absolute top-3 right-4 text-sm font-semibold text-gray-500">Streak: 0</div>
+                <h2 class="text-xl font-bold mb-4 text-center text-primary">Pressure Altitude</h2>
+                <div class="pressure-info mb-4 text-center space-y-1 text-gray-700">
+                    <p>Field Elev: <span id="field-elevation-pressure" class="font-semibold">---- ft</span></p>
+                    <p>Altimeter: <span id="altimeter-setting-pressure" class="font-semibold">--.-- inHg</span></p>
+                </div>
+                <div class="explanation-section mt-4 pt-3 border-t border-gray-200 text-center">
+                     <details>
+                        <summary class="text-sm">How to Calculate</summary>
+                        <div class="text-xs text-gray-600 leading-relaxed mt-2 text-left px-2 space-y-1">
+                           <p>Height above the standard pressure level (29.92 inHg). Used for performance calculations.</p>
+                           <p class="font-mono bg-gray-100 p-1 rounded text-center text-[11px]">PA = Elev + (29.92 - Altimeter) * 1000</p>
+                        </div>
+                     </details>
+                </div>
+                 <div class="options mt-4 grid grid-cols-2 gap-2">
+                    <button class="pressure-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">---- ft</button>
+                    <button class="pressure-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">---- ft</button>
+                    <button class="pressure-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">---- ft</button>
+                    <button class="pressure-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">---- ft</button>
+                </div>
+                <div id="result-pressure-altitude" class="result-feedback mt-4 text-center font-bold text-lg h-6"></div>
+            </div>
+        </div>
 
-    <!-- Descent Calculator Explanation -->
-    <div class="tile explanation-tile">
-        <h2>Descent Calculation Explained</h2>
-        <p class="explanation-text">
-            Knowing when to start your descent ensures a smooth approach and reduces the need for abrupt altitude changes. The basic formula to calculate the distance to start descent is:
-        </p>
-        <p class="explanation-text formula">
-            <strong>Distance = (Current Altitude - Target Altitude) / (Descent Rate / Ground Speed)</strong>
-        </p>
-        <p class="explanation-text">
-            Since speed is in knots (nautical miles per hour) and descent rate is in feet per minute, we adjust units accordingly:
-        </p>
-        <ol class="explanation-list">
-            <li>Calculate the altitude difference (in feet).</li>
-            <li>Determine the time to descend using the descent rate (Time = Altitude Difference / Descent Rate).</li>
-            <li>Convert speed to nautical miles per minute (Speed / 60).</li>
-            <li>Calculate distance using Distance = Speed per Minute × Time.</li>
-        </ol>
-        <p class="explanation-text">
-            By applying this calculation, you can determine the optimal distance to begin your descent for a smooth and safe approach.
-        </p>
-    </div>
-</div>
+        <div id="tab-panel-density" role="tabpanel" aria-labelledby="tab-btn-density" class="hidden">
+            <div id="tile-density-altitude" class="bg-tile p-5 rounded-lg shadow-md flex flex-col relative">
+                <div id="streak-density-altitude" class="absolute top-3 right-4 text-sm font-semibold text-gray-500">Streak: 0</div>
+                <h2 class="text-xl font-bold mb-4 text-center text-primary">Density Altitude</h2>
+                <div class="density-info mb-4 text-center space-y-1 text-gray-700">
+                    <p>Pressure Alt: <span id="pressure-altitude" class="font-semibold">---- ft</span></p>
+                    <p>Temperature: <span id="temperature" class="font-semibold">--°C</span></p>
+                </div>
+                <div class="explanation-section mt-4 pt-3 border-t border-gray-200 text-center">
+                     <details>
+                        <summary class="text-sm">How to Calculate</summary>
+                         <div class="text-xs text-gray-600 leading-relaxed mt-2 text-left px-2 space-y-1">
+                           <p>Pressure altitude corrected for non-standard temperature. Higher DA means lower air density and worse aircraft performance.</p>
+                           <p class="font-mono bg-gray-100 p-1 rounded text-center text-[11px]">ISA Temp = 15 - (PA / 1000) * 2</p>
+                           <p class="font-mono bg-gray-100 p-1 rounded text-center text-[11px]">DA = PA + 120 * (Temp - ISA Temp)</p>
+                        </div>
+                     </details>
+                </div>
+                <div class="options mt-4 grid grid-cols-2 gap-2">
+                    <button class="density-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">---- ft</button>
+                    <button class="density-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">---- ft</button>
+                    <button class="density-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">---- ft</button>
+                    <button class="density-option bg-secondary hover:bg-accent text-white font-medium py-2 px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">---- ft</button>
+                </div>
+                <div id="result-density-altitude" class="result-feedback mt-4 text-center font-bold text-lg h-6"></div>
+            </div>
+        </div>
 
-<script src="js/script.js"></script>
+    </div> </div> <script src="js/script.js" defer></script>
 </body>
 </html>
